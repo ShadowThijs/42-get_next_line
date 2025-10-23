@@ -102,6 +102,8 @@ char	*get_next_line(int fd)
 }
 
 /*
+#include <stdio.h>
+
 int	main(void)
 {
 	int	fd;
