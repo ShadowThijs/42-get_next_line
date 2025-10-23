@@ -12,79 +12,93 @@
 
 #include "get_next_line.h"
 #include <fcntl.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-int	ft_strlen(char *str)
+static char	*extract_line(char **stash)
 {
-	int	i;
-
-	if (!str)
-		return (0);
-	i = 0;
-	while (str[i])
-		i++;
-	return (i);
-}
-
-int	check_newline(char **stash, char **line)
-{
-	int		i;
+	char	*line;
+	char	*newline_pos;
 	char	*temp;
 
-	i = 0;
-	while (*stash && (*stash)[i])
-	{
-		if ((*stash)[i] == '\n' || (*stash)[i] == EOF)
-		{
-			*line = malloc(i + 2);
-			ft_strlcpy(*line, *stash, i + 2);
-			temp = ft_strdup(*stash + i + 1);
-			free(*stash);
-			*stash = malloc(ft_strlen(temp) + 1);
-			*stash = temp;
-			return (1);
-		}
-		i++;
-	}
-	return (0);
+	newline_pos = ft_strchr(*stash, '\n');
+	if (!newline_pos)
+		return (NULL);
+	line = ft_substr(*stash, 0, newline_pos - *stash + 1);
+	temp = ft_strdup(newline_pos + 1);
+	free(*stash);
+	*stash = temp;
+	return (line);
 }
 
-int	read_line(int fd, size_t size, char **stash)
+static char	*cleanup(char **stash, char *buf, int buf_bool, int stash_bool)
 {
-	int		char_read;
+	if (buf_bool == 1)
+	{
+		free(buf);
+	}
+	if (stash_bool == 1)
+	{
+		free(*stash);
+		*stash = NULL;
+	}
+	return (NULL);
+}
+
+static char	*read_and_stash(int fd, char **stash)
+{
 	char	*buf;
 	char	*temp;
+	int		bytes_read;
 
-	buf = malloc(size + 1);
-	if (buf == NULL)
-		return (0);
-	char_read = read(fd, buf, size);
-	buf[char_read + 1] = '\0';
-	temp = ft_strdup(*stash);
+	buf = malloc(BUFFER_SIZE + 1);
+	if (!buf)
+		return (NULL);
+	bytes_read = read(fd, buf, BUFFER_SIZE);
+	if (bytes_read < 0)
+		return (cleanup(stash, buf, 1, 1));
+	if (bytes_read == 0)
+		return (cleanup(stash, buf, 1, 0));
+	buf[bytes_read] = '\0';
+	temp = ft_strjoin(*stash, buf);
+	free(buf);
 	free(*stash);
-	*stash = malloc(size + ft_strlen(*stash) + 1);
-	*stash = ft_strjoin(temp, buf);
-	return (char_read);
+	*stash = temp;
+	return (*stash);
+}
+
+static char	*get_remainder(char **stash)
+{
+	char	*line;
+
+	if (!*stash || !**stash)
+	{
+		free(*stash);
+		*stash = NULL;
+		return (NULL);
+	}
+	line = ft_strdup(*stash);
+	free(*stash);
+	*stash = NULL;
+	return (line);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*stash;
 	char		*line;
-	int			char_read;
 
-	char_read = BUFFER_SIZE;
-	while (char_read == BUFFER_SIZE)
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	while (1)
 	{
-		if (check_newline(&stash, &line))
+		line = extract_line(&stash);
+		if (line)
 			return (line);
-		char_read = read_line(fd, BUFFER_SIZE, &stash);
+		if (!read_and_stash(fd, &stash))
+			break ;
 	}
-	if (check_newline(&stash, &line))
-		return (line);
-	return (NULL);
+	return (get_remainder(&stash));
 }
 
 /*

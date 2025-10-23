@@ -14,11 +14,15 @@
 
 # define GET_NEXT_LINE_H
 
-int		ft_strlcpy(char *src, char *dest, int len);
-int		ft_strlen(char *str);
-char	*ft_strdup(char *str);
-char	*ft_strchr(char *str, int c);
-char	*ft_strjoin(char const *s1, char const *s2);
-char	*ft_substr(const char *s, int start, int len);
+# include <fcntl.h>
+# include <stdlib.h>
+# include <unistd.h>
+
+char	*get_next_line(int fd);
+char	*ft_strchr(char *s, int c);
+char	*ft_strdup(char *s);
+char	*ft_strjoin(char *s1, char *s2);
+char	*ft_substr(char *s, int start, int len);
+int		ft_strlen(char *s);
 
 #endif
