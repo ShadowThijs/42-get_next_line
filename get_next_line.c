@@ -108,16 +108,24 @@ int	main(void)
 {
 	int	fd;
 
-	fd = open("README.md", O_RDONLY);
+	fd = open("test.txt", O_RDONLY);
 	char *line = get_next_line(fd);
-	printf("line 1: %s", line);
+	printf("line 1: %s\n", line);
 	char *line2 = get_next_line(fd);
-	printf("line 2: %s", line2);
+	printf("line 2: %s\n", line2);
 	char *line3 = get_next_line(fd);
-	printf("line 3: %s", line3);
+	printf("line 3: %s\n", line3);
 	char *line4 = get_next_line(fd);
-	printf("line 4: %s", line4);
-	close(fd);
+	printf("line 4: %s\n", line4);
+  char *line5 = get_next_line(fd);
+	printf("line 5: %s\n", line5);
+  char *line6 = get_next_line(fd);
+	printf("line 6: %s\n", line6);
+  char *line7 = get_next_line(fd);
+	printf("line 7: %s\n", line7);
+	char *line8 = get_next_line(fd);
+	printf("line 8: %s\n", line8);
+  close(fd);
 	return (0);
 }
 */
